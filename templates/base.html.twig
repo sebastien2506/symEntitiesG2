@@ -12,6 +12,12 @@
         {% endblock %}
     </head>
     <body>
+        {# création du block pour la bare de navigation,
+        qui n'est pas dans le block body, lui-même effacé
+        par tous les fichiers twigs auto-générés #}
+        {% block navbar %}
+            {% include 'menu.html.twig' %}
+        {% endblock %}
         {% block body %}{% endblock %}
     </body>
 </html>
