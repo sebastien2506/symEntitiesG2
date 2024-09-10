@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ArticleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -27,14 +29,7 @@ class Article
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[ORM\Column(
-        type: Types::DATETIME_MUTABLE,
-        # on passe la valeur par défaut en CURRENT_TIMESTAMP
-        options: [
-            'default' => 'CURRENT_TIMESTAMP',
-        ]
-    )]
-    private ?\DateTimeInterface $dateCreated = null;
+ 
 
     #[ORM\Column(
         options:
@@ -44,6 +39,20 @@ class Article
             ]
     )]
     private ?bool $published = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, insertable: false, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    private ?\DateTimeInterface $dateCreated = null;
+
+    /**
+     * @var Collection<int, Section>
+     */
+    #[ORM\ManyToMany(targetEntity: Section::class, mappedBy: 'sectionArticle')]
+    private Collection $sections;
+
+    public function __construct()
+    {
+        $this->sections = new ArrayCollection();
+    }
 
 
 
@@ -76,6 +85,19 @@ class Article
         return $this;
     }
 
+
+    public function isPublished(): ?bool
+    {
+        return $this->published;
+    }
+
+    public function setPublished(?bool $published): static
+    {
+        $this->published = $published;
+
+        return $this;
+    }
+
     public function getDateCreated(): ?\DateTimeInterface
     {
         return $this->dateCreated;
@@ -88,14 +110,29 @@ class Article
         return $this;
     }
 
-    public function isPublished(): ?bool
+    /**
+     * @return Collection<int, Section>
+     */
+    public function getSections(): Collection
     {
-        return $this->published;
+        return $this->sections;
     }
 
-    public function setPublished(?bool $published): static
+    public function addSection(Section $section): static
     {
-        $this->published = $published;
+        if (!$this->sections->contains($section)) {
+            $this->sections->add($section);
+            $section->addSectionArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSection(Section $section): static
+    {
+        if ($this->sections->removeElement($section)) {
+            $section->removeSectionArticle($this);
+        }
 
         return $this;
     }

@@ -14,9 +14,6 @@ class ArticleType extends AbstractType
         $builder
             ->add('title')
             ->add('description')
-            ->add('dateCreated', null, [
-                'widget' => 'single_text',
-            ])
             ->add('published')
         ;
     }
